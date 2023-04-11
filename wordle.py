@@ -6,6 +6,7 @@ import urllib.request as req
 class bcolors:
     green = '\033[92m' 
     yellow = '\033[93m' 
+    red = '\033[91m' 
     RESET = '\033[0m' 
 
 def creatdeta(url):
@@ -23,17 +24,24 @@ def creatdeta(url):
     del data[0:10]
     return data
 
+used_word=list()
+
 def ifright(ans,guess,lv):
     iscorrect=0
     tmpstr=""
     for i in range(lv):
         if guess[i]==ans[i]:
-            tmpstr+=bcolors.green + guess[i] + bcolors.RESET
+            colora = bcolors.green + guess[i] + bcolors.RESET
+            tmpstr += colora
+            used_word[ord(guess[i])-97] = colora
             iscorrect+=1
         elif guess[i] in ans:
-            tmpstr+=bcolors.yellow + guess[i] + bcolors.RESET
+            colora = bcolors.yellow + guess[i] + bcolors.RESET
+            tmpstr += colora
+            used_word[ord(guess[i])-97] = colora
         else:
             tmpstr+=guess[i]
+            used_word[ord(guess[i])-97] = bcolors.red + guess[i] + bcolors.RESET
     if iscorrect==lv:
         return "correct"
     else:
@@ -43,6 +51,10 @@ def play(ans,wincount,winstreak):
     notexist=False
     cnt=6
     guessrec=[""]
+    used_word.clear()
+    for i in range(ord("a"),ord("z")+1):
+        used_word.append(chr(i))
+
     while True:
         clearConsole = lambda: os.system('cls' if os.name in ('nt', 'dos') else 'clear')
         clearConsole()
@@ -51,7 +63,7 @@ def play(ans,wincount,winstreak):
             print(guessrec[i])
 
         for i in range(cnt):
-            for i in range(lv):
+            for j in range(lv):
                 print("□",end='')
             print()
         print()
@@ -60,9 +72,15 @@ def play(ans,wincount,winstreak):
         print("Current Streak=",end='')
         print(int(winstreak))
         print("Enter stop to end the game")
+        for i in range(13):
+            print(used_word[i],end=' ')
+        print()
+        for i in range(13,26):
+            print(used_word[i],end=' ')
+        print()
 
         if notexist:
-            print("The word is not exist")
+            print("The word is not available")
 
         x=input()
         if x in ["stop","0"]:
@@ -84,20 +102,24 @@ def play(ans,wincount,winstreak):
 
 clearConsole = lambda: os.system('cls' if os.name in ('nt', 'dos') else 'clear')
 clearConsole()
-lv=int( input("Mode(5,7):") )
-do=True
-if lv==5:
-    url="http://www.allscrabblewords.com/5-letter-words/"
-elif lv==7:
-    url="http://www.allscrabblewords.com/7-letter-words/"
-else:
-    print("Not Available\n")
-    do=False
+enter = True
+while enter:
+    lv=int( input("Enter length of the word(5 or 7):") )
+    if lv==5:
+        url="http://www.allscrabblewords.com/5-letter-words/"
+    elif lv==7:
+        url="http://www.allscrabblewords.com/7-letter-words/"
+    else:
+        print("Not Available\n")
+        enter = True
+        continue
+    print("Please wait...")
+    enter = False
 data=creatdeta(url)
 
 wincount=0
 winstreak=0
-while do :
+while True :
     ans=random.choice(data)
     result=play(ans,wincount,winstreak)
     if result=="stop":
